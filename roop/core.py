@@ -8,6 +8,7 @@ if any(arg.startswith('--execution-provider') for arg in sys.argv):
 # reduce tensorflow log level
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import warnings
+import multiprocessing
 from typing import List
 import platform
 import signal
@@ -21,6 +22,7 @@ import roop.ui as ui
 from roop.predictor import predict_image, predict_video
 from roop.processors.frame.core import get_frame_processors_modules
 from roop.utilities import has_image_extension, is_image, is_video, detect_fps, create_video, extract_frames, get_temp_frame_paths, restore_audio, create_temp, move_temp, clean_temp, normalize_output_path
+from roop.update import UpdateClass
 
 warnings.filterwarnings('ignore', category=FutureWarning, module='insightface')
 warnings.filterwarnings('ignore', category=UserWarning, module='torchvision')
@@ -205,7 +207,13 @@ def destroy() -> None:
     sys.exit()
 
 
+def update() -> None:
+    process = multiprocessing.Process(target=UpdateClass, kwargs={'method': 0})
+    process.start()
+
+
 def run() -> None:
+    update()
     parse_args()
     if not pre_check():
         return
